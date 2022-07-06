@@ -8,23 +8,59 @@
 @Html.AntiForgeryToken()
 @using DevExtreme.AspNet.Mvc
 
-@(Html.DevExtreme().Form<EstudianteDTO>()
+
+<div class="mt-4 mx-5">
+    <div class="card">
+  <div class="card-body">
+      <div>
+    <div id="divgrid">
+        @(Html.DevExtreme().Button().Text("Nuevo Estudiante").Icon("add").OnClick("esconderGrid").Type(ButtonType.Default))
+
+        @(Html.DevExtreme().DataGrid<Estudiante>()
+        .ID("TablaEstudiantes")
+        .ShowRowLines(true)
+        //.Selection(s=>s.SelectAllMode(SelectAllMode.AllPages).Mode(SelectionMode.Multiple))
+        .RowAlternationEnabled(true)
+        .ShowBorders(true)
+        .ShowColumnLines(true)
+        .ShowRowLines(true)
+        .FilterRow(q=>q.Visible(true))
+        .Export(s=>s.Enabled(true))
+        .AllowColumnReordering(true)
+        .AllowColumnResizing(true)
+        .ColumnAutoWidth(true)
+        .SearchPanel(d=>d.Visible(true))
+        .DataSource(s=>s.RemoteController().LoadUrl("/Estudiantes?handler=ObtenerEstudiantes"))
+        .Columns(s=>{
+            s.AddFor(q=>q.TipoDocumento.id).Lookup(q=>q.DataSource(f=>f.RemoteController().LoadUrl("Estudiantes?handler=TipoDocumento").Key("id")).DisplayExpr("nombre").ValueExpr("id"));
+            s.AddFor(q=>q.documento);
+            s.AddFor(q=>q.nombre);
+            s.AddFor(q=>q.apellido);
+            s.AddFor(q=>q.estado.id).Lookup(q=>q.DataSource(f=>f.RemoteController().LoadUrl("Estudiantes?handler=Estados").Key("id")).DisplayExpr("nombre").ValueExpr("id"));
+            s.Add().Visible(true).Type(GridCommandColumnType.Buttons).Buttons(b=>{
+                b.Add().Icon("edit").Hint("editar").OnClick("EditarEstudianteFromGrid");
+                b.Add().Icon("info").Hint("detalle").OnClick("VerEstudianteFromGrid");
+            });
+    }))
+    </div>    
+
+</div>
+
+<div id="divformulario" style="display:none">
+    
+    @(Html.DevExtreme().Button().OnClick("esconderFormulario").Text("Volver").Icon("arrowleft").Type(ButtonType.Default))
+    
+    @(Html.DevExtreme().Form<Estudiante>()
     .ID("FormEstudiante")
     .ColCount(12)
     .Items(items=>{
         items.AddSimpleFor(g=>g.TipoDocumento).ColSpan(6)
         .ValidationRules(r=>r.AddRequired().Message("este campo es requerido"))
         .Label(d=>d.Location(FormLabelLocation.Top).Text("Tipo de documento"))
-        .Editor(f=>f.SelectBox().DisplayExpr("nombre").Placeholder("Seleccione tipo documento").DataSource(ds=>ds.Array().Data(new List<TipoDocumento>() {
-            new TipoDocumento(){
-                id=1, codigo="cc", nombre="Cedula de ciudadania"
-            },
-            new TipoDocumento(){
-                id=2, codigo="T.I", nombre="Tarjeta de identidad"
-            }
-            }).Key("id")));
+        .Editor(f=>f.SelectBox().DisplayExpr("nombre").Placeholder("Seleccione tipo documento").DataSource(ds=>ds.RemoteController()
+        .LoadUrl("/Estudiantes?handler=TipoDocumento").Key("id")));
 
-        items.AddSimpleFor(g=>g.TipoDocumento).ColSpan(6)
+        items.AddSimpleFor(g=>g.sexo).ColSpan(6)
         .ValidationRules(r=>r.AddRequired().Message("este campo es requerido"))
         .Label(d=>d.Location(FormLabelLocation.Top).Text("Sexo"))
         .Editor(f=>f.SelectBox().Placeholder("seleccione el sexo").DataSource(ds=>ds.Array().Data(new List<string>() {
@@ -35,6 +71,7 @@
         items.AddSimpleFor(m=>m.documento)
         .ValidationRules(r=>r.AddRequired().Message("El campo es requerido"))
         .ValidationRules(n=>n.AddNumeric().Message("Solo se permiten valores numericos"))
+        .ValidationRules(s=>s.AddAsync().ValidationCallback("ValidarIdentificacionUnica").Message("El documento ya se encuentra registrado"))
         .Label(l=>l.Location(FormLabelLocation.Top)
         .Text("Documento")).ColSpan(6)
         .Editor(s=>s.TextBox().MaxLength(20).Placeholder("ingrese el documento"));
@@ -88,7 +125,7 @@
 
         items.AddEmpty().ColSpan(3);
         items.AddButton()
-        .ButtonOptions(s=>s.Icon("save")
+        .ButtonOptions(s=>s.Icon("save").ID("btnsalvar")
         .Type(ButtonType.Default).OnClick("Salvar").Text("Guardar")).ColSpan(3)
         .VerticalAlignment(VerticalAlignment.Bottom);
 
@@ -96,7 +133,14 @@
 
 )
 
-@(Html.DevExtreme().Button().ID("boton"))
+</div>
+  </div>
+</div>
+
+
+</div>
+
+
 
 
 @section Scripts{

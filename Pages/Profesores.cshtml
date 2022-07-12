@@ -1,4 +1,51 @@
 ﻿@page
 @model GestionEstudiante1.Pages.ProfesoresModel
 @{
+    Layout = "~/Pages/Shared/_DevExtremeLayout.cshtml";
+}
+@Html.AntiForgeryToken()
+@using DevExtreme.AspNet.Mvc
+@using EstudiantesCore1.Entidades
+
+<div class="mt-4 mx-5">
+<div class="card">
+  <div class="card-body">
+    <div class="my-4">
+        @(Html.DevExtreme().Button().OnClick("AddModeGrid").Icon("add").Text("Nueva Materia").Type(ButtonType.Default))
+    </div>
+    <div>
+        @(Html.DevExtreme().DataGrid<Profesor>()
+        .ID("TablaProfesor")
+        .Editing(s=>s.AllowUpdating(true).AllowAdding(true).UseIcons(true).Mode(GridEditMode.Popup))
+        .ShowRowLines(true)
+        .OnEditingStart("SetEditMode")
+        //.OnRowUpdating("SetEditMode")
+        //.Selection(s=>s.SelectAllMode(SelectAllMode.AllPages).Mode(SelectionMode.Multiple))
+        .RowAlternationEnabled(true)
+        .ShowBorders(true)
+        .ShowColumnLines(true)
+        .ShowRowLines(true)
+        .FilterRow(q=>q.Visible(true))
+        .Export(s=>s.Enabled(true))
+        .AllowColumnReordering(true)
+        .AllowColumnResizing(true)
+        .ColumnAutoWidth(true)
+        .SearchPanel(d=>d.Visible(true))
+        .DataSource(s=>s.RemoteController().UpdateUrl("/Profesores?handler=ActualizarProfesor").InsertUrl("/Profesores?handler=CrearProfesor").LoadUrl("/Profesores?handler=ObtenerProfesores").Key("id"))
+        .Columns(s=>{
+            s.AddFor(q=>q.tipoDocumento.id).Lookup(t=>t.DataSource(f=>f.RemoteController().LoadUrl("/Profesores?handler=ObtenerTipoDeDocumento").Key("id")).DisplayExpr("nombre").ValueExpr("id"));
+            s.AddFor(q=>q.documento).ValidationRules(g=>{
+                g.AddRequired().Message("el documento es obligatorio");
+                g.AddAsync().ValidationCallback("DocumentoUnico").Message("Ese codigo ya existe");
+            }).FormItem(h=>h.Editor(e=>e.TextBox().MaxLength(20)));
+            s.AddFor(q=>q.nombre).ValidationRules(g=>g.AddRequired().Message("el nombre es obligatorio"));
+            s.AddFor(q=>q.apellido).ValidationRules(g=>g.AddRequired().Message("el apellido es obligatorio"));
+            s.AddFor(q=>q.estado.id).Lookup(t=>t.DataSource(f=>f.RemoteController().LoadUrl("/Profesores?handler=ObtenerEstadoProfesor").Key("id")).DisplayExpr("nombre").ValueExpr("id"));    }))
+    </div>
+  </div>
+</div>
+</div>
+
+@section Scripts{
+    <script src="~/js/Profesores.js"></script>
 }

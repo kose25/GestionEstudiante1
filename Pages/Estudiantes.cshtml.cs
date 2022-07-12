@@ -5,6 +5,7 @@ using EstudiantesCore1.Entidades;
 using EstudiantesCore1.interactores;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 
@@ -12,15 +13,18 @@ namespace GestionEstudiante1.Pages
 {
     public class EstudiantesModel : PageModel
     {
+        private readonly ILogger<EstudiantesModel> _logger;
 
         private readonly IMatricula _matricula;
         public void OnGet()
         {
+            _logger.LogInformation("entro a la vista de estudiantes");
         }
 
-        public EstudiantesModel(IMatricula matricula)
+        public EstudiantesModel(IMatricula matricula, ILogger<EstudiantesModel> logger)
         {
             _matricula = matricula;
+            _logger = logger;
         }
 
 
@@ -50,6 +54,7 @@ namespace GestionEstudiante1.Pages
             }
             catch (Exception e)
             {
+                _logger.LogError(e, "Codigo 23 Error al crear un usuario");
                 return StatusCode(500, e.Message);
             }
 
@@ -88,7 +93,7 @@ namespace GestionEstudiante1.Pages
                 return new JsonResult(DataSourceLoader.Load(documentos, options));
             }
             catch (Exception e)
-            {
+            {                
                 return StatusCode(500, e.Message);
             }
 

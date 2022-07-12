@@ -3,3 +3,49 @@
 @{
     Layout = "~/Pages/Shared/_DevExtremeLayout.cshtml";
 }
+@Html.AntiForgeryToken()
+@using DevExtreme.AspNet.Mvc
+@using EstudiantesCore1.Entidades
+
+<div class="mt-4 mx-5">
+<div class="card">
+  <div class="card-body">
+    <div class="my-4">
+        @(Html.DevExtreme().Button().OnClick("AddModeGrid").Icon("add").Text("Nueva Materia").Type(ButtonType.Default))
+    </div>
+    <div>
+        @(Html.DevExtreme().DataGrid<Materia>()
+        .ID("TablaMateria")
+        .Editing(s=>s.AllowUpdating(true).AllowAdding(true).UseIcons(true).Mode(GridEditMode.Form))
+        .ShowRowLines(true)
+        .OnEditingStart("SetEditMode")
+        //.OnRowUpdating("SetEditMode")
+        //.Selection(s=>s.SelectAllMode(SelectAllMode.AllPages).Mode(SelectionMode.Multiple))
+        .RowAlternationEnabled(true)
+        .ShowBorders(true)
+        .ShowColumnLines(true)
+        .ShowRowLines(true)
+        .FilterRow(q=>q.Visible(true))
+        .Export(s=>s.Enabled(true))
+        .AllowColumnReordering(true)
+        .AllowColumnResizing(true)
+        .ColumnAutoWidth(true)
+        .SearchPanel(d=>d.Visible(true))
+        .DataSource(s=>s.RemoteController().UpdateUrl("/Materias?handler=ActualizarMateria").InsertUrl("/Materias?handler=CrearMateria").LoadUrl("/Materias?handler=ObtenerMaterias").Key("id"))
+        .Columns(s=>{
+            s.AddFor(q=>q.codigo).ValidationRules(g=>{
+                g.AddRequired().Message("el codigo es obligatorio");
+                g.AddAsync().ValidationCallback("CodigoUnico").Message("Ese codigo ya existe");
+            }).FormItem(h=>h.Editor(e=>e.TextBox().MaxLength(4)));
+            s.AddFor(q=>q.nombre).ValidationRules(g=>g.AddRequired().Message("el nombre es obligatorio"));      
+            s.AddFor(q=>q.estado.id).Lookup(t=>t.DataSource(f=>f.RemoteController().LoadUrl("/Materias?handler=ObtenerEstadoMaterias").Key("id")).DisplayExpr("nombre").ValueExpr("id"));
+            s.AddFor(q=>q.year).ValidationRules(g=>g.AddRequired().Message("el año es obligatorio")).FormItem(k=>k.Editor(l=>l.NumberBox().Min(DateTime.Now.Year)));
+    }))
+    </div>
+  </div>
+</div>
+</div>
+
+@section Scripts{
+    <script src="~/js/Materias.js"></script>
+}

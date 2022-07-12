@@ -47,92 +47,8 @@
 </div>
 
 <div id="divformulario" style="display:none">
+    @(await Html.PartialAsync("/Pages/PartialViews/_formestudiante.cshtml"))
     
-    @(Html.DevExtreme().Button().OnClick("esconderFormulario").Text("Volver").Icon("arrowleft").Type(ButtonType.Default))
-    
-    @(Html.DevExtreme().Form<Estudiante>()
-    .ID("FormEstudiante")
-    .ColCount(12)
-    .Items(items=>{
-        items.AddSimpleFor(g=>g.TipoDocumento).ColSpan(6)
-        .ValidationRules(r=>r.AddRequired().Message("este campo es requerido"))
-        .Label(d=>d.Location(FormLabelLocation.Top).Text("Tipo de documento"))
-        .Editor(f=>f.SelectBox().DisplayExpr("nombre").Placeholder("Seleccione tipo documento").DataSource(ds=>ds.RemoteController()
-        .LoadUrl("/Estudiantes?handler=TipoDocumento").Key("id")));
-
-        items.AddSimpleFor(g=>g.sexo).ColSpan(6)
-        .ValidationRules(r=>r.AddRequired().Message("este campo es requerido"))
-        .Label(d=>d.Location(FormLabelLocation.Top).Text("Sexo"))
-        .Editor(f=>f.SelectBox().Placeholder("seleccione el sexo").DataSource(ds=>ds.Array().Data(new List<string>() {
-            "M","F"
-            })));
-
-        
-        items.AddSimpleFor(m=>m.documento)
-        .ValidationRules(r=>r.AddRequired().Message("El campo es requerido"))
-        .ValidationRules(n=>n.AddNumeric().Message("Solo se permiten valores numericos"))
-        .ValidationRules(s=>s.AddAsync().ValidationCallback("ValidarIdentificacionUnica").Message("El documento ya se encuentra registrado"))
-        .Label(l=>l.Location(FormLabelLocation.Top)
-        .Text("Documento")).ColSpan(6)
-        .Editor(s=>s.TextBox().MaxLength(20).Placeholder("ingrese el documento"));
-
-        items.AddSimpleFor(m=>m.nombre)
-        .ValidationRules(v=>v.AddRequired().Message("El nombre es requerido"))
-        .ValidationRules(q=>q.AddStringLength().Min(5).Max(20).Message("Minimo 5 maximo 20"))
-        .Label(f=>f.Location(FormLabelLocation.Top)
-        .Text("Nombre"))
-        .ColSpan(6)
-        .Editor(d=>d.TextBox().MaxLength(100).Placeholder("ingrese el nombre"));
-
-        items.AddSimpleFor(m=>m.apellido)
-        .ValidationRules(v=>v.AddRequired().Message("El apellido es requerido"))
-        .Label(f=>f.Location(FormLabelLocation.Top)
-        .Text("Apellido")).ColSpan(6)
-        .Editor(d=>d.TextBox().MaxLength(100).Placeholder("Ingrese apellido"));
-
-        items.AddSimpleFor(f=>f.fechaNacimiento).ColSpan(6)
-        .ValidationRules(r=>r.AddRequired().Message("la fecha es obligatoria"))
-        .Label(d=>d.Location(FormLabelLocation.Top).Text("Fecha de naciemiento"))
-        .Editor(f=>f.DateBox().Max(DateTime.Now).DateSerializationFormat("yyyy-MM-dd").DisplayFormat("dd/MM/yyy").Placeholder("Ingrese fecha"));
-
-        items.AddSimpleFor(m=>m.email)
-        .ValidationRules(v=>v.AddRequired().Message("El email es requerido"))
-        .ValidationRules(q=>q.AddEmail().Message("el email debe ser valido"))
-        .Label(f=>f.Location(FormLabelLocation.Top)
-        .Text("Email"))
-        .ColSpan(4)
-        .Editor(d=>d.TextBox().MaxLength(100));
-
-        items.AddSimpleFor(m=>m.telefono)
-        .ValidationRules(v=>v.AddRequired().Message("El telefono es requerido"))
-        .ValidationRules(q=>q.AddNumeric().Message("debe ser un numero"))
-        .Label(f=>f.Location(FormLabelLocation.Top)
-        .Text("Telefono"))
-        .ColSpan(4)
-        .Editor(d=>d.TextBox().MaxLength(20).Placeholder("ingrese telefono"));
-
-        items.AddSimpleFor(m=>m.direccion)
-        .ValidationRules(v=>v.AddRequired().Message("la direccion es requerido"))
-        .Label(f=>f.Location(FormLabelLocation.Top)
-        .Text("Direccion"))
-        .ColSpan(4)
-        .Editor(d=>d.TextArea().MaxLength(200));
-
-        items.AddSimpleFor(f=>f.fechaIngreso).ColSpan(4)
-        .ValidationRules(r=>r.AddRequired().Message("la fecha es obligatoria"))
-        .Label(d=>d.Location(FormLabelLocation.Top).Text("Fecha de ingreso"))
-        .Editor(f=>f.DateBox().Max(DateTime.Now).DateSerializationFormat("yyyy-MM-dd").DisplayFormat("dd/MM/yyy"));
-
-        items.AddEmpty().ColSpan(3);
-        items.AddButton()
-        .ButtonOptions(s=>s.Icon("save").ID("btnsalvar")
-        .Type(ButtonType.Default).OnClick("Salvar").Text("Guardar")).ColSpan(3)
-        .VerticalAlignment(VerticalAlignment.Bottom);
-
-    })
-
-)
-
 </div>
   </div>
 </div>
@@ -140,7 +56,23 @@
 
 </div>
 
-
+@(Html.DevExtreme().Popup()
+.ID("PopDetalleEstudiante")
+.Title("Datos del Estudiante")
+.ShowTitle(true)
+.Visible(false)
+.DeferRendering(false)
+.DragEnabled(true)
+.MaxHeight(320)
+.MaxWidth(600)
+.CloseOnOutsideClick(true)
+.ContentTemplate(
+@<text>
+    <div>
+        @(await Html.PartialAsync("/Pages/PartialViews/_formestudiante.cshtml"))
+    </div>
+</text>
+))
 
 
 @section Scripts{

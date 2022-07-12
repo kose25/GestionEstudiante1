@@ -107,10 +107,27 @@ async function EditarEstudianteFromGrid(e) {
 }
 
 async function VerEstudianteFromGrid(e) {
-    EditarEstudianteFromGrid(e);
-    $("#FormEstudiante").dxForm("instance").option("readOnly", true);
-    $("#btnsalvar").dxButton("instance").option("disabled", true);
-    isEdition = true;
+    var idEstudiante = e.row.data.id;
+    var estudiante = await $.ajax({
+        method: "GET",
+        url: "/Estudiantes?handler=ObtenerEstudiante",
+        data: { idEstudiante: idEstudiante }
+    });
+    if (estudiante == null) {
+        Swal.fire(
+            'Atencion',
+            'Estudiante no encontrado',
+            'info'
+        )
+    } else {        
+        $("#divformulario").show();
+        $("#FormEstudiante").dxForm("instance").resetValues();
+        $("#FormEstudiante").dxForm("instance").option("formData", estudiante);
+        $("#FormEstudiante").dxForm("instance").option("readOnly", false);
+        //$("#FormEstudiante").dxForm("instance").getEditor("TipoDocumento").option("readOnly", true);
+        //$("#FormEstudiante").dxForm("instance").getEditor("documento").option("readOnly", true);
+        isEdition = true;
+    }
 }
 
 function esconderGrid() {
